@@ -4,10 +4,21 @@ def interpret_command_with_ollama(command):
     api_base = "http://localhost:11434/v1"
     model_name = "codellama"
 
+    prompt = (
+        "You are an assistant specializing in data analysis tasks. "
+        "Interpret the user’s query and identify the most relevant statistical action or visualization type. "
+        "Respond strictly in the following format: "
+        "action: [specific action, concise and descriptive, such as 'linear regression', 'clustering', or leave empty if not applicable] "
+        "visualization: [specific visualization type, concise and descriptive, such as 'scatter plot', 'bar chart', or leave empty if not applicable] "
+        "x: [x-axis column or leave empty if not applicable] "
+        "y: [y-axis column or leave empty if not applicable] "
+        "Do not elaborate, explain, or use phrases. Keep the action concise without verbs or unnecessary details."
+    )
+    
     payload = {
         "model": model_name,
         "messages": [
-            {"role": "system", "content": "You are an assistant specializing in data analysis tasks. Interpret the user’s query and identify the most relevant statistical action or visualization type. If the query is about a statistical operation like regression or clustering, specify action (e.g., linear regression, clustering) and its associated visualization (e.g., scatter plot). For simple visualization requests like histograms or bar charts, omit the action and only specify visualization. Use the format: action: [specific action, if applicable] visualization: [specific visualization type] x: [x-axis column], y: [y-axis column] (if relevant) Be concise and do not include unrelated details or suggest multiple options."},
+            {"role": "system", "content": prompt},
             {"role": "user", "content": command},
         ],
     }

@@ -1,43 +1,82 @@
 import pandas as pd
-from ollama_test import interpret_command_with_ollama  # Import the LLM function
-from linnear_regression import dynamic_linear_regression  # Import the regression function
+import streamlit as st
+import matplotlib.pyplot as plt
+from ollama_test import interpret_command_with_ollama
+from linnear_regression import dynamic_linear_regression
 
-# Load the dataset
-file_path = "/Users/gk/Python-AI-Data-Analyst/sample_data_for_development.xlsx"
-df = pd.read_excel(file_path)
+# Initialize session state
+if "responses" not in st.session_state:
+    st.session_state.responses = []
 
-# Define the query
-command = "run a linear regression on age vs sales"
+# Streamlit UI
+st.title("Excel-Powered Data Analysis with LLM")
 
-# Get the response from the LLM
-response = interpret_command_with_ollama(command)
-print("LLM Response:", response)
+# File uploader for Excel files
+uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx", "xls"])
+if uploaded_file:
+    # Load the Excel file into a DataFrame
+    df = pd.read_excel(uploaded_file)
 
-# Parse the response
-response_lines = response.split("\n")
-action = None
-visualization = None
-x_column = None
-y_column = None
+    # Normalize column names to lowercase for consistency with the function
+    df.columns = [col.lower() for col in df.columns]
 
-# Extract keywords from the LLM response
-for line in response_lines:
-    if line.startswith("action:"):
-        action = line.split(":", 1)[1].strip()
-    elif line.startswith("visualization:"):
-        visualization = line.split(":", 1)[1].strip()
-    elif line.startswith("x:"):
-        x_column = line.split(":", 1)[1].strip()
-    elif line.startswith("y:"):
-        y_column = line.split(":", 1)[1].strip()
+    st.write("Data from the uploaded Excel file:")
+    st.write(df)
 
-# Validate and execute the regression function
-if action == "Linear Regression" and visualization == "Scatter Plot" and x_column and y_column:
-    try:
-        print(f"Running linear regression with x={x_column}, y={y_column}...")
-        result = dynamic_linear_regression(df, x_column, y_column)
-        print("Regression Result:", result)
-    except Exception as e:
-        print(f"Error: {e}")
-else:
-    print("No valid action or visualization detected.")
+    response_container = st.container()
+
+    # Chat box for user input
+    with st.container():
+        user_query = st.text_input("Enter your question:")
+        if st.button("Submit Query"):
+            # Interpret the command using LLM
+            response = interpret_command_with_ollama(user_query)
+
+            # Parse the LLM response
+            response_lines = response.lower().replace(", ", "\n").split("\n")
+            keywords = {"action": None, "visualization": None, "x": None, "y": None}
+            for line in response_lines:
+                for key in keywords:
+                    if line.startswith(f"{key}:"):
+                        keywords[key] = line.split(":", 1)[1].strip()
+
+            action = keywords["action"]
+            visualization = keywords["visualization"]
+            x_column = keywords["x"]
+            y_column = keywords["y"]
+
+            # Process the response
+            if action == "linear regression" and x_column and y_column:
+                # Normalize x_column and y_column for case-insensitive matching
+                x_column = x_column.lower()
+                y_column = y_column.lower()
+
+                # Check if the specified columns exist
+                if x_column not in df.columns or y_column not in df.columns:
+                    st.session_state.responses.append(
+                        {"text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
+                    )
+                else:
+                    try:
+                        # Run linear regression
+                        regression_result = dynamic_linear_regression(df, x_column, y_column)
+
+                        # Prepare response entry
+                        response_entry = {"text": regression_result.get("message", "Linear regression completed.")}
+                        if "type" in regression_result and regression_result["type"] == "plot":
+                            response_entry["plot"] = regression_result["value"]
+
+                        # Append to session state
+                        st.session_state.responses.append(response_entry)
+                    except Exception as e:
+                        st.session_state.responses.append({"text": f"Error during execution: {e}"})
+            else:
+                # Handle other types of responses or errors
+                st.session_state.responses.append({"text": response})
+
+    # Display responses
+    with response_container:
+        for response in st.session_state.responses[::1]:
+            st.write(response["text"])
+            if "plot" in response:
+                st.image(response["plot"], caption="Generated Plot")
