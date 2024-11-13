@@ -1,8 +1,8 @@
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
-from ollama_test import interpret_command_with_ollama
-from linnear_regression import dynamic_linear_regression
+from ollama_llm import interpret_command_with_ollama
+from data_functions import dynamic_linear_regression, data_summary, data_cleaning, descriptive_statistics, correlation_analysis, scatter_plot, histogram
 
 # Initialize session state
 if "responses" not in st.session_state:
@@ -70,13 +70,72 @@ if uploaded_file:
                         st.session_state.responses.append(response_entry)
                     except Exception as e:
                         st.session_state.responses.append({"text": f"Error during execution: {e}"})
-            else:
-                # Handle other types of responses or errors
-                st.session_state.responses.append({"text": response})
+            elif action == "summary":
+                summary_result = data_summary(df)
+                response_entry = {"text": summary_result.get("message")}
+                st.session_state.responses.append(response_entry)
+            elif action == "clean":
+                clean_data = data_cleaning(df)
+                response_entry = {"text": clean_data.get("message")}
+                st.session_state.responses.append(response_entry)
+            elif action == "describe":
+                clean_data = descriptive_statistics(df)
+                response_entry = {"text": clean_data.get("message")}
+                st.session_state.responses.append(response_entry)   
+            elif action == "correlation":
+                corr = correlation_analysis(df)
+                response_entry = {"text": corr.get("message")}
+                st.session_state.responses.append(response_entry)
+                
+            elif visualization == "scatter plot" and x_column and y_column:
+                # Normalize x_column and y_column for case-insensitive matching
+                x_column = x_column.lower()
+                y_column = y_column.lower()
+
+                # Check if the specified columns exist
+                if x_column not in df.columns or y_column not in df.columns:
+                    st.session_state.responses.append(
+                        {"text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
+                    )
+                else:
+                    try:
+                        scatter_plot = scatter_plot(df, x_column, y_column)
+                        response_entry = {"text": scatter_plot.get("message")}
+                        if "type" in scatter_plot and scatter_plot["type"] == "plot":
+                            response_entry["plot"] = scatter_plot["value"]
+                        st.session_state.responses.append(response_entry)
+                    except Exception as e:
+                        st.session_state.responses.append({"text": f"Error during execution: {e}"})
+            elif visualization == "histogram" and x_column:
+                # Normalize x_column and y_column for case-insensitive matching
+                x_column = x_column.lower()
+
+                # Check if the specified columns exist
+                if x_column not in df.columns:
+                    st.session_state.responses.append(
+                        {"text": f"Error: Column '{x_column}' not found in the data."}
+                    )
+                else:
+                    try:
+                        histogram = histogram(df, x_column)
+                        response_entry = {"text": histogram.get("message")}
+                        if "type" in histogram and histogram["type"] == "plot":
+                            response_entry["plot"] = histogram["value"]
+                        st.session_state.responses.append(response_entry)
+                    except Exception as e:
+                        st.session_state.responses.append({"text": f"Error during execution: {e}"})
+            # else:
+            #     # Handle other types of responses or errors
+            #     st.session_state.responses.append({"text": response})
 
     # Display responses
     with response_container:
         for response in st.session_state.responses[::1]:
-            st.write(response["text"])
+            # st.write(response["text"])
             if "plot" in response:
                 st.image(response["plot"], caption="Generated Plot")
+            elif any(keyword in response["text"] for keyword in ("Data Summary:", "Data Description:", "Data After Cleaning:", "Correlation Analysis:")):
+                # st.subheader("Data Summary:")
+                st.code(response["text"], language="plaintext")
+            else:
+                st.write("please try again")

@@ -1,13 +1,13 @@
 import pandas as pd
-from ollama_test import interpret_command_with_ollama  # Import the LLM function
-from linnear_regression import dynamic_linear_regression  # Import the regression function
+from ollama_llm import interpret_command_with_ollama  # Import the LLM function
+from data_functions import dynamic_linear_regression, data_summary  # Import the regression function
 
 # Load the dataset
 file_path = "/Users/gk/Python-AI-Data-Analyst/sample_data_for_development.xlsx"
 df = pd.read_excel(file_path)
 
 # Define the query
-command = "run a linear regression on age vs sales"
+command = "show histogram of sales"
 
 # Get the response from the LLM
 response = interpret_command_with_ollama(command)
@@ -50,5 +50,9 @@ if action == "linear regression" and x_column and y_column:
         print("Regression Result:", result)
     except Exception as e:
         print(f"Error: {e}")
+
+elif action == "summary":
+    result = data_summary(df)
+    print(result.get("message"))
 else:
     print("No valid action or visualization detected.")

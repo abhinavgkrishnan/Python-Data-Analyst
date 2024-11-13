@@ -8,13 +8,13 @@ def interpret_command_with_ollama(command):
         "You are an assistant specializing in data analysis tasks. "
         "Interpret the user’s query and identify the most relevant statistical action or visualization type. "
         "Respond strictly in the following format: "
-        "action: [specific action, concise and descriptive, such as 'linear regression', 'clustering', or leave empty if not applicable] "
-        "visualization: [specific visualization type, concise and descriptive, such as 'scatter plot', 'bar chart', or leave empty if not applicable] "
-        "x: [x-axis column or leave empty if not applicable] "
-        "y: [y-axis column or leave empty if not applicable] "
+        "action: [specific action, concise and descriptive, such as 'linear regression', 'clustering', 'summary', 'clean', 'describe', 'correlation'. 'descriptive analysis' in query means action is 'describe', 'histogram' in query means action is histogram or leave empty if not applicable] "
+        "visualization: [specific visualization type, concise and descriptive, such as 'scatter plot', 'bar chart', 'histogram' or leave empty if not applicable] "
+        "x: [x-axis column or leave empty if not applicable, only take column name from the query. 'histogram' in query means only 'x-axis' column] "
+        "y: [y-axis column or leave empty if not applicable, only take column name from the query] "
         "Do not elaborate, explain, or use phrases. Keep the action concise without verbs or unnecessary details."
     )
-    
+
     payload = {
         "model": model_name,
         "messages": [
