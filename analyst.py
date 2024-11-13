@@ -9,7 +9,7 @@ if "responses" not in st.session_state:
     st.session_state.responses = []
 
 # Streamlit UI
-st.title("Excel-Powered Data Analysis with LLM")
+st.title("AI Data Analyst with Ollama")
 
 # File uploader for Excel files
 uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx", "xls"])
