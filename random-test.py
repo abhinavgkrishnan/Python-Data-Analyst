@@ -3,11 +3,19 @@ from ollama_llm import interpret_command_with_ollama  # Import the LLM function
 from data_functions import dynamic_linear_regression, data_summary  # Import the regression function
 
 # Load the dataset
-file_path = "/Users/gk/Python-AI-Data-Analyst/sample_data_for_development.xlsx"
+file_path = "/Users/gk/Python-AI-Data-Analyst/Analyst/sample_data_for_development.xlsx"
 df = pd.read_excel(file_path)
 
+df.columns = [col.lower() for col in df.columns]
+
 # Define the query
-command = "show histogram of sales"
+# command = "show summary"
+command = "do descriptive analysis"
+# command = "show scatter plot of age vs income"
+# command = "show histogram of sales"
+# command = "run linear regression on income vs sales"
+# command = "clean data"
+# command = "do correlation analysis"
 
 # Get the response from the LLM
 response = interpret_command_with_ollama(command)
@@ -15,7 +23,7 @@ print("LLM Response:", response)
 
 # Parse the response
 response_lines = response.lower().replace(", ", "\n").split("\n")  # Handle inline key-value pairs
-keywords = {"action": None, "visualization": None, "x": None, "y": None}
+keywords = {"action": None, "x": None, "y": None}
 
 # Extract key information from the response
 for line in response_lines:
@@ -32,19 +40,19 @@ if keywords["x"] is None and "x:" in response:
                 keywords[key] = pair.split(":", 1)[1].strip()
 
 action = keywords["action"]
-visualization = keywords["visualization"]
 x_column = keywords["x"]
 y_column = keywords["y"]
 
 # Debugging: Print extracted values
 print("Action:", action)
-print("Visualization:", visualization)
 print("X-axis column:", x_column)
 print("Y-axis column:", y_column)
 
 # Validate and execute the regression function
 if action == "linear regression" and x_column and y_column:
     try:
+        x_column = x_column.lower()
+        y_column = y_column.lower()
         print(f"Running linear regression with x={x_column}, y={y_column}...")
         result = dynamic_linear_regression(df, x_column, y_column)
         print("Regression Result:", result)

@@ -7,12 +7,21 @@ def interpret_command_with_ollama(command):
     prompt = (
         "You are an assistant specializing in data analysis tasks. "
         "Interpret the user’s query and identify the most relevant statistical action or visualization type. "
-        "Respond strictly in the following format: "
-        "action: [specific action, concise and descriptive, such as 'linear regression', 'clustering', 'summary', 'clean', 'describe', 'correlation' or leave empty if not applicable. 'descriptive analysis' in query means action is 'describe', 'summary' in query means action is summary 'histogram' in query means action is histogram] "
-        "visualization: [specific visualization type, concise and descriptive, such as 'scatter plot', 'bar chart', 'histogram' or leave empty if not applicable] "
-        "x: [x-axis column or leave empty if not applicable, only take column name from the query. 'histogram' in query means only 'x-axis' column] "
-        "y: [y-axis column or leave empty if not applicable, only take column name from the query] "
-        "Do not elaborate, explain, or use phrases. Keep the action concise without verbs or unnecessary details."
+        "Always respond in the following format: "
+        "action: [specific action, concise, such as 'linear regression', 'summary', 'describe', 'correlation', 'scatter plot', 'histogram', 'clean data'] "
+        "x: [x-axis column or leave empty if not applicable] "
+        "y: [y-axis column or leave empty if not applicable] "
+        "Definitions: "
+        "'summary' refers to displaying the metadata or structure of the dataset, such as column types and counts. "
+        "'describe' refers to generating descriptive statistics of the dataset, such as mean, median, standard deviation, and quartiles. "
+        "For 'describe data' or 'do descriptive analysis', always use action: 'describe'. "
+        "Instructions: "
+        "- Always match the column names ('x' or 'y') exactly as they appear in the query without substituting or changing them. "
+        "- Do not include quotes around column names in the response. Write them plainly (e.g., x: sales). "
+        "- Do not respond in a single line. Each key ('action', 'x', 'y') must be on a separate line in the response. "
+        "- Ensure that 'y' is only included if the query explicitly involves comparing two columns, such as in scatter plots or linear regression. "
+        "- For 'histogram', only include the 'x' column based on the query and leave 'y' empty. "
+        "Do not elaborate, explain, or use phrases. Only respond in the specified format."
     )
 
     payload = {
