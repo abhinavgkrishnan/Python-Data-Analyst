@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 from ollama_llm import interpret_command_with_ollama
-from data_functions import dynamic_linear_regression, data_summary, data_cleaning, descriptive_statistics, correlation_analysis, scatter_plot, histogram
+from data_functions import dynamic_linear_regression, data_summary, data_cleaning, descriptive_statistics, correlation_analysis, scatter_plot, histogram, line_graph, bar_chart, covariance_analysis, skewness_analysis, kurtosis_analysis
 
 # Initialize session state
 if "responses" not in st.session_state:
@@ -46,92 +46,122 @@ if uploaded_file:
 
             # Process the response
             if action == "linear regression" and x_column and y_column:
-                # Normalize x_column and y_column for case-insensitive matching
                 x_column = x_column.lower()
                 y_column = y_column.lower()
-
-                # Check if the specified columns exist
                 if x_column not in df.columns or y_column not in df.columns:
                     st.session_state.responses.append(
-                        {"text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
+                        {"query": user_query, "text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
                     )
                 else:
                     try:
-                        # Run linear regression
                         regression_result = dynamic_linear_regression(df, x_column, y_column)
-
-                        # Prepare response entry
-                        response_entry = {"text": regression_result.get("message", "Linear regression completed.")}
+                        response_entry = {"query": user_query, "text": regression_result.get("message", "Linear regression completed.")}
                         if "type" in regression_result and regression_result["type"] == "plot":
                             response_entry["plot"] = regression_result["value"]
-
-                        # Append to session state
                         st.session_state.responses.append(response_entry)
                     except Exception as e:
-                        st.session_state.responses.append({"text": f"Error during execution: {e}"})
+                        st.session_state.responses.append({"query": user_query, "text": f"Error during execution: {e}"})
             elif action == "summary":
                 summary_result = data_summary(df)
-                response_entry = {"text": summary_result.get("message")}
+                response_entry = {"query": user_query, "text": summary_result.get("message")}
                 st.session_state.responses.append(response_entry)
             elif action == "clean data":
                 clean_data = data_cleaning(df)
-                response_entry = {"text": clean_data.get("message")}
+                response_entry = {"query": user_query, "text": clean_data.get("message")}
                 st.session_state.responses.append(response_entry)
             elif action == "describe":
                 clean_data = descriptive_statistics(df)
-                response_entry = {"text": clean_data.get("message")}
+                response_entry = {"query": user_query, "text": clean_data.get("message")}
                 st.session_state.responses.append(response_entry)
             elif action == "correlation":
                 corr = correlation_analysis(df)
-                response_entry = {"text": corr.get("message")}
+                response_entry = {"query": user_query, "text": corr.get("message")}
+                st.session_state.responses.append(response_entry)
+            elif action == "covariance":
+                cov = covariance_analysis(df)
+                response_entry = {"query": user_query, "text": cov.get("message")}
+                st.session_state.responses.append(response_entry)
+            elif action == "skew":
+                skew = skewness_analysis(df)
+                response_entry = {"query": user_query, "text": skew.get("message")}
+                st.session_state.responses.append(response_entry)
+            elif action == "kurtosis":
+                kurt = kurtosis_analysis(df)
+                response_entry = {"query": user_query, "text": kurt.get("message")}
                 st.session_state.responses.append(response_entry)
             elif action == "scatter plot" and x_column and y_column:
-                # Normalize x_column and y_column for case-insensitive matching
                 x_column = x_column.lower()
                 y_column = y_column.lower()
-
-                # Check if the specified columns exist
                 if x_column not in df.columns or y_column not in df.columns:
                     st.session_state.responses.append(
-                        {"text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
+                        {"query": user_query, "text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
                     )
                 else:
                     try:
                         scatter_result = scatter_plot(df, x_column, y_column)
-                        response_entry = {"text": scatter_result.get("message")}
+                        response_entry = {"query": user_query, "text": scatter_result.get("message")}
                         if "type" in scatter_result and scatter_result["type"] == "plot":
                             response_entry["plot"] = scatter_result["value"]
                         st.session_state.responses.append(response_entry)
                     except Exception as e:
-                        st.session_state.responses.append({"text": f"Error during execution: {e}"})
+                        st.session_state.responses.append({"query": user_query, "text": f"Error during execution: {e}"})
             elif action == "histogram" and x_column:
-                # Normalize x_column for case-insensitive matching
                 x_column = x_column.lower()
-
-                # Check if the specified column exists
                 if x_column not in df.columns:
                     st.session_state.responses.append(
-                        {"text": f"Error: Column '{x_column}' not found in the data."}
+                        {"query": user_query, "text": f"Error: Column '{x_column}' not found in the data."}
                     )
                 else:
                     try:
                         histogram_result = histogram(df, x_column)
-                        response_entry = {"text": histogram_result.get("message")}
+                        response_entry = {"query": user_query, "text": histogram_result.get("message")}
                         if "type" in histogram_result and histogram_result["type"] == "plot":
                             response_entry["plot"] = histogram_result["value"]
                         st.session_state.responses.append(response_entry)
                     except Exception as e:
-                        st.session_state.responses.append({"text": f"Error during execution: {e}"})
+                        st.session_state.responses.append({"query": user_query, "text": f"Error during execution: {e}"})
+            elif action == "bar chart" and x_column and y_column:
+                x_column = x_column.lower()
+                y_column = y_column.lower()
+                if x_column not in df.columns or y_column not in df.columns:
+                    st.session_state.responses.append(
+                        {"query": user_query, "text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
+                    )
+                else:
+                    try:
+                        bar_result = bar_chart(df, x_column, y_column)
+                        response_entry = {"query": user_query, "text": bar_result.get("message")}
+                        if "type" in bar_result and bar_result["type"] == "plot":
+                            response_entry["plot"] = bar_result["value"]
+                        st.session_state.responses.append(response_entry)
+                    except Exception as e:
+                        st.session_state.responses.append({"query": user_query, "text": f"Error during execution: {e}"})
+            elif action == "line graph" and x_column and y_column:
+                x_column = x_column.lower()
+                y_column = y_column.lower()
+                if x_column not in df.columns or y_column not in df.columns:
+                    st.session_state.responses.append(
+                        {"query": user_query, "text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
+                    )
+                else:
+                    try:
+                        line_result = line_graph(df, x_column, y_column)
+                        response_entry = {"query": user_query, "text": line_result.get("message")}
+                        if "type" in line_result and line_result["type"] == "plot":
+                            response_entry["plot"] = line_result["value"]
+                        st.session_state.responses.append(response_entry)
+                    except Exception as e:
+                        st.session_state.responses.append({"query": user_query, "text": f"Error during execution: {e}"})
             else:
-                # Append a generic "please try again" response if no valid action or visualization was detected
-                st.session_state.responses.append({"text": "please try again"})
+                st.session_state.responses.append({"query": user_query, "text": "please try again"})
 
             # Display responses
             with response_container:
                 for response in st.session_state.responses[::1]:  # Reverse order for latest response first
+                    st.write(f"**User Query:** {response['query']}")
                     if "plot" in response:
                         st.image(response["plot"], caption="Generated Plot")
-                    elif any(keyword in response["text"] for keyword in ("Data Summary:", "Data Description:", "Data After Cleaning:", "Correlation Analysis:")):
+                    elif any(keyword in response["text"] for keyword in ("Data Summary:", "Data Description:", "Data After Cleaning:", "Correlation Analysis:", "Covariance Analysis:", "Skewness Analysis:", "Kurtosis Analysis:")):
                         st.code(response["text"], language="plaintext")
                     else:
                         st.write(response["text"])

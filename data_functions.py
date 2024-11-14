@@ -61,6 +61,27 @@ def correlation_analysis(df: pd.DataFrame):
         "message": f"Correlation Analysis: \n {corr}"
     }
     return result
+
+def covariance_analysis(df: pd.DataFrame):
+    cov = df.cov()
+    formatted_cov = cov.to_string()
+    result = {
+        "message": f"Covariance Analysis: \n {formatted_cov}"
+    }
+    return result
+    
+def skewness_analysis(df: pd.DataFrame):
+    skew = df.skew()
+    result = {
+        "message": f"Skewness Analysis: \n{skew}"
+    }
+    return result
+def kurtosis_analysis(df: pd.DataFrame):
+    kurt = df.kurtosis()
+    result = {
+        "message": f"Kurtosis Analysis: \n{kurt}"
+    }
+    return result
 def scatter_plot(df: pd.DataFrame, x_column: str, y_column: str):
     import matplotlib.pyplot as plt
 
@@ -92,5 +113,37 @@ def histogram(df: pd.DataFrame, x_column):
         "type": "plot",
         "value": filename,
         "message": "Histogram"
+    }
+    return result
+def bar_chart(df: pd.DataFrame, x_column: str, y_column: str):
+    import matplotlib.pyplot as plt
+
+    plt.figure()
+    plt.bar(df[x_column], df[y_column])
+    plt.xlabel(x_column)
+    plt.ylabel(y_column)
+    plt.title(f"Bar Chart of {y_column.capitalize()} by {x_column.capitalize()}")
+    filename = f"bar_chart_{int(time.time())}.png"
+    plt.savefig(filename)
+    result = {
+        "type": "plot",
+        "value": filename,
+        "message": "Bar Chart"
+    }
+    return result
+def line_graph(df: pd.DataFrame, x_column: str, y_column: str):
+    import matplotlib.pyplot as plt
+
+    plt.figure()
+    plt.plot(df[x_column], df[y_column])
+    plt.xlabel(x_column)
+    plt.ylabel(y_column)
+    plt.title(f"Line Graph of {y_column.capitalize()} vs. {x_column.capitalize()}")
+    filename = f"line_graph_{int(time.time())}.png"
+    plt.savefig(filename)
+    result = {
+        "type": "plot",
+        "value": filename,
+        "message": "Line Graph"
     }
     return result
