@@ -9,35 +9,23 @@ from data_functions import (
     logistic_regression
 )
 
-# Initialize session state
 if "responses" not in st.session_state:
     st.session_state.responses = []
 
-# Streamlit UI
 st.title("AI Data Analyst with Ollama")
 
-# File uploader for Excel files
 uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx", "xls"])
 if uploaded_file:
-    # Load the Excel file into a DataFrame
     df = pd.read_excel(uploaded_file)
-
-    # Normalize column names to lowercase for consistency with the function
     df.columns = [col.lower() for col in df.columns]
-
     st.write("Data from the uploaded Excel file:")
     st.write(df)
-
     response_container = st.container()
 
-    # Chat box for user input
     with st.container():
         user_query = st.text_input("Enter your question:")
         if st.button("Submit Query"):
-            # Interpret the command using LLM
             response = interpret_command_with_ollama(user_query)
-
-            # Parse the LLM response
             response_lines = response.lower().replace(", ", "\n").split("\n")
             keywords = {"action": None, "x": None, "y": None}
             for line in response_lines:
@@ -49,7 +37,6 @@ if uploaded_file:
             x_column = keywords["x"]
             y_column = keywords["y"]
 
-            # Process the response
             if action == "linear regression" and x_column and y_column:
                 x_column = x_column.lower()
                 y_column = y_column.lower()
@@ -193,7 +180,6 @@ if uploaded_file:
             else:
                 st.session_state.responses.append({"query": user_query, "text": "please try again"})
 
-            # Display responses
             with response_container:
                 for response in st.session_state.responses[::1]:
                     st.write(f"**User Query:** {response['query']}")

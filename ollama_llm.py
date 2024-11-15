@@ -34,11 +34,7 @@ def interpret_command_with_ollama(command):
         f"{api_base}/chat/completions",
         json=payload,
     )
-
-    # Debugging: Print the raw response
     print("Full API Response:", response.text)
-
-    # Parse the response
     if response.status_code == 200:
         return response.json()["choices"][0]["message"]["content"]
     else:
