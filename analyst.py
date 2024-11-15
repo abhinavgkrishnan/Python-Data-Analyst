@@ -2,7 +2,12 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 from ollama_llm import interpret_command_with_ollama
-from data_functions import dynamic_linear_regression, data_summary, data_cleaning, descriptive_statistics, correlation_analysis, scatter_plot, histogram, line_graph, bar_chart, covariance_analysis, skewness_analysis, kurtosis_analysis
+from data_functions import (
+    dynamic_linear_regression, data_summary, data_cleaning, descriptive_statistics,
+    correlation_analysis, logistic_regression, scatter_plot, histogram, line_graph, bar_chart,
+    covariance_analysis, skewness_analysis, kurtosis_analysis, polynomial_regression,
+    logistic_regression
+)
 
 # Initialize session state
 if "responses" not in st.session_state:
@@ -56,6 +61,39 @@ if uploaded_file:
                     try:
                         regression_result = dynamic_linear_regression(df, x_column, y_column)
                         response_entry = {"query": user_query, "text": regression_result.get("message", "Linear regression completed.")}
+                        if "type" in regression_result and regression_result["type"] == "plot":
+                            response_entry["plot"] = regression_result["value"]
+                        st.session_state.responses.append(response_entry)
+                    except Exception as e:
+                        st.session_state.responses.append({"query": user_query, "text": f"Error during execution: {e}"})
+            elif action == "polynomial regression" and x_column and y_column:
+                x_column = x_column.lower()
+                y_column = y_column.lower()
+                if x_column not in df.columns or y_column not in df.columns:
+                    st.session_state.responses.append(
+                        {"query": user_query, "text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
+                    )
+                else:
+                    try:
+                        degree = 2
+                        regression_result = polynomial_regression(df, x_column, y_column, degree=degree)
+                        response_entry = {"query": user_query, "text": regression_result.get("message", "Polynomial regression completed.")}
+                        if "type" in regression_result and regression_result["type"] == "plot":
+                            response_entry["plot"] = regression_result["value"]
+                        st.session_state.responses.append(response_entry)
+                    except Exception as e:
+                        st.session_state.responses.append({"query": user_query, "text": f"Error during execution: {e}"})
+            elif action == "logistic regression" and x_column and y_column:
+                x_column = x_column.lower()
+                y_column = y_column.lower()
+                if x_column not in df.columns or y_column not in df.columns:
+                    st.session_state.responses.append(
+                        {"query": user_query, "text": f"Error: Columns '{x_column}' or '{y_column}' not found in the data."}
+                    )
+                else:
+                    try:
+                        regression_result = logistic_regression(df, x_column, y_column)
+                        response_entry = {"query": user_query, "text": regression_result.get("message", "Logistic regression completed.")}
                         if "type" in regression_result and regression_result["type"] == "plot":
                             response_entry["plot"] = regression_result["value"]
                         st.session_state.responses.append(response_entry)
@@ -157,10 +195,10 @@ if uploaded_file:
 
             # Display responses
             with response_container:
-                for response in st.session_state.responses[::1]:  # Reverse order for latest response first
+                for response in st.session_state.responses[::1]:
                     st.write(f"**User Query:** {response['query']}")
                     if "plot" in response:
-                        st.image(response["plot"], caption="Generated Plot")
+                        st.image(response["plot"], caption=response["text"])
                     elif any(keyword in response["text"] for keyword in ("Data Summary:", "Data Description:", "Data After Cleaning:", "Correlation Analysis:", "Covariance Analysis:", "Skewness Analysis:", "Kurtosis Analysis:")):
                         st.code(response["text"], language="plaintext")
                     else:

@@ -15,10 +15,10 @@ df.columns = [col.lower() for col in df.columns]
 # command = "do descriptive analysis"
 # command = "show scatter plot of age vs income"
 # command = "show histogram of sales"
-# command = "run linear regression on income vs sales"
+command = "run linear regression on income vs age"
 # command = "clean data"
 # command = "do correlation analysis"
-command = "do covariance analysis"
+# command = "do covariance analysis"
 
 # Get the response from the LLM
 response = interpret_command_with_ollama(command)

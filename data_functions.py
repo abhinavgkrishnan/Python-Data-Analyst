@@ -9,12 +9,10 @@ def dynamic_linear_regression(df: pd.DataFrame, x_column: str, y_column: str):
     from sklearn.linear_model import LinearRegression
     import matplotlib.pyplot as plt
 
-    # Perform linear regression
     model = LinearRegression()
     model.fit(X, y)
     df['y_pred'] = model.predict(X)
 
-    # Plot the regression results
     plt.scatter(df[x_column], df[y_column], color="blue", label="Actual Data")
     plt.plot(df[x_column], df['y_pred'], color="red", label="Regression Line")
     plt.xlabel(x_column.capitalize())
@@ -27,6 +25,66 @@ def dynamic_linear_regression(df: pd.DataFrame, x_column: str, y_column: str):
         "type": "plot",
         "value": filename,
         "message": f"Linear regression completed. Coefficient: {model.coef_[0]}, Intercept: {model.intercept_}"
+    }
+    return result
+    
+def polynomial_regression(df: pd.DataFrame, x_column: str, y_column: str, degree: int = 2):
+    from sklearn.preprocessing import PolynomialFeatures
+    from sklearn.linear_model import LinearRegression
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    X = df[[x_column]].to_numpy()
+    y = df[y_column].to_numpy()
+
+    poly = PolynomialFeatures(degree=degree)
+    X_poly = poly.fit_transform(X)
+
+    model = LinearRegression()
+    model.fit(X_poly, y)
+    y_pred = model.predict(X_poly)
+
+    plt.scatter(X, y, color="blue", label="Actual Data")
+    plt.plot(X, y_pred, color="red", label=f"Polynomial Regression (Degree {degree})")
+    plt.xlabel(x_column.capitalize())
+    plt.ylabel(y_column.capitalize())
+    plt.title(f"{y_column.capitalize()} vs. {x_column.capitalize()} (Polynomial Regression)")
+    plt.legend()
+    filename = f"polynomial_regression_{int(time.time())}.png"
+    plt.savefig(filename)
+    result = {
+        "type": "plot",
+        "value": filename,
+        "message": f"Polynomial regression completed with degree {degree}."
+    }
+    return result
+    
+def logistic_regression(df: pd.DataFrame, x_column: str, y_column: str):
+    from sklearn.linear_model import LogisticRegression
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    X = df[[x_column]].to_numpy()
+    y = df[y_column].to_numpy()
+
+    model = LogisticRegression()
+    model.fit(X, y)
+    y_pred = model.predict(X)
+
+    y_prob = model.predict_proba(X)[:, 1]
+
+    plt.scatter(X, y, color="blue", label="Actual Data")
+    plt.plot(X, y_prob, color="red", label="Logistic Regression Curve")
+    plt.xlabel(x_column.capitalize())
+    plt.ylabel(f"Probability of {y_column.capitalize()}")
+    plt.title(f"{y_column.capitalize()} vs. {x_column.capitalize()} (Logistic Regression)")
+    plt.legend()
+    filename = f"logistic_regression_{int(time.time())}.png"
+    plt.savefig(filename)
+    result = {
+        "type": "plot",
+        "value": filename,
+        "message": f"Logistic regression completed. Coefficients: {model.coef_[0]}, Intercept: {model.intercept_}"
     }
     return result
 
