@@ -2,43 +2,36 @@
 
 ## Overview
 
-AI Data Analyst with Ollama is a Streamlit-based application that allows users to analyze their datasets using advanced machine learning models and statistical methods. It leverages natural language queries interpreted by a locally hosted LLM (Codellama) to execute tasks such as generating visualizations, performing regression analysis, and more.
-
-## Features
-
-- Interpret user queries via a locally hosted LLM (Codellama).
-- Support for various statistical operations:
-  - Descriptive Statistics
-  - Correlation and Covariance Analysis
-  - Skewness and Kurtosis
-- Machine Learning Models:
-  - Linear Regression
-  - Polynomial Regression
-  - Logistic Regression
-- Generate visualizations:
-  - Scatter Plot
-  - Histogram
-  - Line Graph
-  - Bar Chart
+This project is a **Streamlit-based AI-powered data analysis application** that leverages the Ollama LLM for interpreting user queries and provides analytical insights, visualizations, and statistical operations on uploaded datasets.
 
 ## Setup and Installation
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.8 or higher
 - Local Codellama LLM instance (accessible via `http://localhost:11434/v1`).
-- Streamlit for UI rendering.
-- Matplotlib, Pandas, Scikit-learn for data analysis and visualization.
+- Required Python libraries:
+  - `streamlit`
+  - `pandas`
+  - `matplotlib`
+  - `sklearn`
+  - `requests`
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd <repository-directory>
+   git clone https://github.com/abhinavgkrishnan/Python-Data-Analyst
+   cd Python-Data-Analyst
    ```
 
-2. Install the required dependencies:
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install the required packages:
    ```bash
    pip install -r requirements.txt
    ```
@@ -52,75 +45,115 @@ AI Data Analyst with Ollama is a Streamlit-based application that allows users t
    requests
    ```
 
-3. Start the local Codellama LLM instance:
-   Ensure your LLM is running and accessible via `http://localhost:11434/v1`.
-
-4. Run the Streamlit app:
+4. Start the Streamlit application:
    ```bash
    streamlit run analyst.py
    ```
+### Assumptions
+- The uploaded Excel file has column names in the first row.
+- The Ollama LLM is pre-configured and running locally.
 
-## Usage
+---
 
-1. Upload an Excel file via the UI.
-2. Enter your query in plain English. Example queries:
+## Documentation
+
+### Key Files
+
+#### 1. `ollama_llm.py`
+This script communicates with the Ollama LLM to interpret user queries and extract actionable insights.
+
+**Key Function:**
+- `interpret_command_with_ollama(command: str) -> str`
+  - Sends the user query to the Ollama LLM.
+  - Extracts and returns the response in a structured format.
+
+**Example Response Format:**
+```
+action: linear regression
+x: income
+y: sales
+```
+
+---
+
+#### 2. `data_functions.py`
+This script contains functions for performing various data analysis tasks and visualizations.
+
+**Functions:**
+
+- **Regression Models:**
+  - `dynamic_linear_regression`: Fits a linear regression model and plots the results.
+  - `polynomial_regression`: Fits a polynomial regression model of a specified degree.
+  - `logistic_regression`: Fits a logistic regression model and plots the probability curve.
+
+- **Descriptive and Cleaning Functions:**
+  - `data_summary`: Provides metadata about the dataset (e.g., column types and counts).
+  - `data_cleaning`: Cleans the dataset by removing duplicates and filling missing values.
+  - `descriptive_statistics`: Generates statistical summaries of the dataset.
+
+- **Statistical Analysis:**
+  - `correlation_analysis`: Computes and returns the correlation matrix.
+  - `covariance_analysis`: Computes and returns the covariance matrix.
+  - `skewness_analysis`: Computes skewness for each column.
+  - `kurtosis_analysis`: Computes kurtosis for each column.
+
+- **Visualizations:**
+  - `scatter_plot`: Generates a scatter plot for two variables.
+  - `histogram`: Generates a histogram for a single variable.
+  - `bar_chart`: Generates a bar chart for two variables.
+  - `line_graph`: Generates a line graph for two variables.
+
+**Unique Implementation Details:**
+- Each visualization saves the plot with a timestamp to avoid overwriting files.
+- Error handling ensures invalid column names are flagged gracefully.
+
+---
+
+#### 3. `analyst.py`
+This is the main application script integrating Streamlit for user interaction.
+
+**Features:**
+- **File Upload:**
+  Allows users to upload an Excel file for analysis.
+- **User Query Input:**
+  Accepts user queries in natural language.
+- **LLM Interpretation:**
+  Uses `ollama_llm.py` to interpret the query and determine the appropriate action.
+- **Result Display:**
+  Dynamically displays results or visualizations based on user queries.
+
+**Supported Actions:**
+- Linear Regression
+- Polynomial Regression
+- Logistic Regression
+- Summary
+- Describe (Descriptive Statistics)
+- Correlation
+- Covariance
+- Skewness
+- Kurtosis
+- Scatter Plot
+- Histogram
+- Bar Chart
+- Line Graph
+
+**Key Implementation:**
+- User queries are processed through the Ollama LLM to determine the required action and columns.
+- Results are displayed alongside the user's query in the Streamlit interface.
+- Responses persist in `st.session_state` to ensure previous results remain visible.
+
+---
+
+## Example Usage
+1. Upload an Excel file containing your dataset (e.g., `Age`, `Income`, `Sales`).
+2. Enter queries such as:
    - "Run linear regression on income vs sales"
-   - "Show a scatter plot of age vs income"
+   - "Show histogram of sales"
+   - "Do descriptive analysis"
    - "Perform correlation analysis"
-3. View the results and generated visualizations directly in the Streamlit interface.
+3. View results or visualizations directly in the Streamlit interface.
 
-## Key Files
+---
 
-### `analyst.py`
-The main entry point for the application. Handles:
-- UI rendering using Streamlit.
-- Query input from the user.
-- Calling the LLM for query interpretation.
-- Mapping the interpreted commands to respective functions.
 
-### `ollama_llm.py`
-Interacts with the locally hosted Codellama LLM to interpret user queries. Key considerations:
-- Follows a strict format for the LLM's response.
-- Processes the LLM response to extract the `action`, `x`, and `y`.
-
-### `data_functions.py`
-Contains the core logic for data analysis and visualization:
-
-- **Regression Models**
-  - `dynamic_linear_regression(df, x_column, y_column)`: Performs linear regression.
-  - `polynomial_regression(df, x_column, y_column, degree)`: Polynomial regression with a specified degree.
-  - `logistic_regression(df, x_column, y_column)`: Logistic regression.
-
-- **Statistical Analysis**
-  - `data_summary(df)`: Provides dataset metadata.
-  - `data_cleaning(df)`: Cleans the dataset by dropping duplicates and filling missing values.
-  - `descriptive_statistics(df)`: Generates descriptive statistics.
-  - `correlation_analysis(df)`: Computes and displays the correlation matrix.
-  - `covariance_analysis(df)`: Computes and displays the covariance matrix.
-  - `skewness_analysis(df)`: Computes skewness for all numeric columns.
-  - `kurtosis_analysis(df)`: Computes kurtosis for all numeric columns.
-
-- **Visualizations**
-  - `scatter_plot(df, x_column, y_column)`: Generates a scatter plot.
-  - `histogram(df, x_column)`: Generates a histogram.
-  - `bar_chart(df, x_column, y_column)`: Generates a bar chart.
-  - `line_graph(df, x_column, y_column)`: Generates a line graph.
-
-## Assumptions
-
-1. Column names in the dataset are case-insensitively matched to the queries.
-2. All datasets are in Excel format (`.xls` or `.xlsx`).
-3. The local LLM is pre-configured and operational.
-4. User queries adhere to the supported actions and column names available in the dataset.
-
-## Notes
-- Ensure that the uploaded Excel file contains appropriate column names and data types.
-- The polynomial regression function defaults to degree 2 unless specified otherwise.
-- Logistic regression assumes the dependent variable (`y`) is binary.
-
-## Contributions
-Feel free to submit issues or pull requests for additional features or bug fixes.
-
-## License
-This project is licensed under the MIT License.
-
+For any issues, suggestions, or contributions, please contact Abhinav G Krishnan at abhinavgkrishnan@gmail.com
