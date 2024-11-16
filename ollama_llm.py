@@ -1,8 +1,8 @@
 import requests
 
-def interpret_command_with_ollama(command):
-    api_base = "http://localhost:11434/v1"
-    model_name = "codellama"
+def interpret_command_with_huggingface(command):
+    api_url = "https://api-inference.huggingface.co/models/meta/codellama"
+    headers = {"Authorization": f"Bearer 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"}
 
     prompt = (
         "You are an assistant specializing in data analysis tasks. "
@@ -23,19 +23,10 @@ def interpret_command_with_ollama(command):
         "Do not elaborate, explain, or use phrases. Only respond in the specified format."
     )
 
-    payload = {
-        "model": model_name,
-        "messages": [
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": command},
-        ],
-    }
-    response = requests.post(
-        f"{api_base}/chat/completions",
-        json=payload,
-    )
-    print("Full API Response:", response.text)
+    payload = {"inputs": f"User Query: {command}\n{prompt}"}
+
+    response = requests.post(api_url, headers=headers, json=payload)
     if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
+        return response.json()["generated_text"]
     else:
-        raise RuntimeError(f"Error from LLaMA server: {response.text}")
+        raise RuntimeError(f"Error from Hugging Face API: {response.text}")
