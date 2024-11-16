@@ -16,6 +16,7 @@ This project is a **Streamlit-based AI-powered data analysis application** that 
   - `matplotlib`
   - `sklearn`
   - `requests`
+  - `openpyxl`
 
 ### Installation
 
@@ -43,6 +44,7 @@ This project is a **Streamlit-based AI-powered data analysis application** that 
    pandas
    scikit-learn
    requests
+   openpyxl
    ```
 
 4. Start the Streamlit application:
