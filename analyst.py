@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
-from ollama_llm import interpret_command_with_ollama
+from ollama_llm import interpret_command_with_huggingface
 from data_functions import (
     dynamic_linear_regression, data_summary, data_cleaning, descriptive_statistics,
     correlation_analysis, logistic_regression, scatter_plot, histogram, line_graph, bar_chart,
@@ -25,7 +25,7 @@ if uploaded_file:
     with st.container():
         user_query = st.text_input("Enter your question:")
         if st.button("Submit Query"):
-            response = interpret_command_with_ollama(user_query)
+            response = interpret_command_with_huggingface(user_query)
             response_lines = response.lower().replace(", ", "\n").split("\n")
             keywords = {"action": None, "x": None, "y": None}
             for line in response_lines:
